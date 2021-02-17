@@ -4,6 +4,7 @@ const path = require("path");
 const express = require("express");
 const mongoose = require("mongoose");
 const methodOverride = require("method-override");
+const ejsMate = require("ejs-mate");
 
 // IMPORTED MODELS
 const Campground = require("./models/campground");
@@ -12,6 +13,7 @@ const Campground = require("./models/campground");
 const app = express();
 
 // MIDDLEWARES
+app.engine("ejs", ejsMate);
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 
