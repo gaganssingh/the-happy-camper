@@ -24,16 +24,23 @@ const seedDB = async () => {
   // Create new locations
   for (let i = 0; i < 50; i++) {
     const random1000 = Math.floor(Math.random() * cities.length);
+    const randomPrice = Math.floor(Math.random() * 20) + 10;
     const camp = new Campground({
       title: `${sample(descriptors)} ${sample(places)}`,
       location: `${cities[random1000].city}, ${cities[random1000].state}`,
+      image: "https://source.unsplash.com/collection/483251",
+      description:
+        "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Aliquam dignissimos ut minima ad odio eos!",
+      price: randomPrice,
     });
     await camp.save();
   }
 };
 
 // Execute the seed function
-seedDB().then(() =>
+seedDB().then(() => {
+  console.log("Seeding DB........");
   // close db connection when seeding complete
-  mongoose.connection.close()
-);
+  mongoose.connection.close();
+  console.log("✅ Seeding DB Successfull");
+});
