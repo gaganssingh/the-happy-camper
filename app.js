@@ -8,6 +8,7 @@ const ejsMate = require("ejs-mate");
 
 // CUSTOM IMPORTS
 const catchAsync = require("./utils/catchAsync");
+const ExpressError = require("./utils/ExpressError");
 
 // IMPORTED MODELS
 const Campground = require("./models/campground");
@@ -57,6 +58,9 @@ app.get("/campgrounds/new", (req, res) => {
 app.post(
   "/campgrounds",
   catchAsync(async (req, res, next) => {
+    if (!req.body.campground) {
+      throw new ExpressError("Invalid campground data", 400);
+    }
     const campground = new Campground(req.body.campground);
     await campground.save();
     res.redirect(`/campgrounds/${campground._id}`);
@@ -105,9 +109,17 @@ app.delete(
   })
 );
 
+app.all("*", (req, res, next) => {
+  next(new ExpressError("Page Not Found", 404));
+});
+
 // ERROR HANDLERS
 app.use((err, req, res, next) => {
-  res.send("🔥 EVERYTHING WENT TO HELL!!!! 🔥");
+  const { statusCode = 500 } = err;
+  if (!err.message) {
+    err.message = "Oops! Something went terribly wrong";
+  }
+  res.status(statusCode).render("error", { err });
 });
 
 // SERVE THE APP
