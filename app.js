@@ -9,6 +9,7 @@ const ejsMate = require("ejs-mate");
 // CUSTOM IMPORTS
 const catchAsync = require("./utils/catchAsync");
 const ExpressError = require("./utils/ExpressError");
+const { campgroundSchema } = require("./validationSchemas");
 
 // IMPORTED MODELS
 const Campground = require("./models/campground");
@@ -20,6 +21,19 @@ const app = express();
 app.engine("ejs", ejsMate);
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
+
+// HELPER FUNCTIONS -> TO BE MOVED TO SEPARATE FILE
+const validateCampground = (req, res, next) => {
+  // Check if all expected data present
+  // If data missing from req body
+  const { error } = campgroundSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
+    throw new ExpressError(msg, 400);
+  } else {
+    next();
+  }
+};
 
 // MAKE MONGODB TO APP CONNECTION
 mongoose
@@ -57,10 +71,9 @@ app.get("/campgrounds/new", (req, res) => {
 // Add a new campground -> POST request from the form
 app.post(
   "/campgrounds",
+  validateCampground,
   catchAsync(async (req, res, next) => {
-    if (!req.body.campground) {
-      throw new ExpressError("Invalid campground data", 400);
-    }
+    // If all expected data present, create the campground
     const campground = new Campground(req.body.campground);
     await campground.save();
     res.redirect(`/campgrounds/${campground._id}`);
@@ -90,6 +103,7 @@ app.get(
 // EDIT a campground -> PUT request from the form
 app.put(
   "/campgrounds/:id",
+  validateCampground,
   catchAsync(async (req, res) => {
     const { id } = req.params;
     await Campground.findByIdAndUpdate(id, {
