@@ -139,6 +139,7 @@ app.delete(
 );
 
 // REVIEW ROUTES
+// POST - a review
 app.post(
   "/campgrounds/:id/reviews",
   validateReview,
@@ -151,6 +152,23 @@ app.post(
     await review.save();
     await campground.save();
     res.redirect(`/campgrounds/${campground._id}`);
+  })
+);
+
+// DELETE - a review
+app.delete(
+  "/campgrounds/:id/reviews/:reviewId",
+  catchAsync(async (req, res) => {
+    const { id, reviewId } = req.params;
+
+    // from the campground db, delete the entry for this review
+    // The $pull operator removes from an existing array all instances of a value or values that match a specified condition
+    await Campground.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
+
+    // from the review db, delete this review
+    await Review.findByIdAndDelete(reviewId);
+
+    res.redirect(`/campgrounds/${id}`);
   })
 );
 
