@@ -13,6 +13,7 @@ const { campgroundSchema } = require("./validationSchemas");
 
 // IMPORTED MODELS
 const Campground = require("./models/campground");
+const Review = require("./models/review");
 
 // INIT THE APP
 const app = express();
@@ -50,10 +51,12 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
 // ROUTE HANDLERS
+// Generic
 app.get("/", (req, res) => {
   res.render("home");
 });
 
+// CAMPGROUNDS ROUTES
 // Campgrounds index
 app.get(
   "/campgrounds",
@@ -120,6 +123,21 @@ app.delete(
     const { id } = req.params;
     await Campground.findByIdAndDelete(id);
     res.redirect("/campgrounds");
+  })
+);
+
+// REVIEW ROUTES
+app.post(
+  "/campgrounds/:id/reviews",
+  catchAsync(async (req, res) => {
+    const { id } = req.params;
+    const campground = await Campground.findById(id);
+
+    const review = new Review(req.body.review);
+    campground.reviews.push(review);
+    await review.save();
+    await campground.save();
+    res.redirect(`/campgrounds/${campground._id}`);
   })
 );
 
