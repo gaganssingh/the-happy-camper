@@ -9,7 +9,7 @@ const ejsMate = require("ejs-mate");
 // CUSTOM IMPORTS
 const catchAsync = require("./utils/catchAsync");
 const ExpressError = require("./utils/ExpressError");
-const { campgroundSchema } = require("./validationSchemas");
+const { campgroundSchema, reviewSchema } = require("./validationSchemas");
 
 // IMPORTED MODELS
 const Campground = require("./models/campground");
@@ -24,10 +24,22 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 
 // HELPER FUNCTIONS -> TO BE MOVED TO SEPARATE FILE
+// DATA VALIDATION - Campgrounds
 const validateCampground = (req, res, next) => {
   // Check if all expected data present
   // If data missing from req body
   const { error } = campgroundSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
+    throw new ExpressError(msg, 400);
+  } else {
+    next();
+  }
+};
+
+// DATA VALIDATION - Reviews
+const validateReview = (req, res, next) => {
+  const { error } = reviewSchema.validate(req.body);
   if (error) {
     const msg = error.details.map((el) => el.message).join(",");
     throw new ExpressError(msg, 400);
@@ -129,6 +141,7 @@ app.delete(
 // REVIEW ROUTES
 app.post(
   "/campgrounds/:id/reviews",
+  validateReview,
   catchAsync(async (req, res) => {
     const { id } = req.params;
     const campground = await Campground.findById(id);
