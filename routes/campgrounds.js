@@ -5,6 +5,7 @@ const router = express.Router();
 const Campground = require("../models/campground");
 
 // CUSTOM IMPORTS
+const ExpressError = require("../utils/ExpressError");
 const catchAsync = require("../utils/catchAsync");
 const { campgroundSchema } = require("../validationSchemas");
 
@@ -14,6 +15,7 @@ const validateCampground = (req, res, next) => {
   // Check if all expected data present
   // If data missing from req body
   const { error } = campgroundSchema.validate(req.body);
+  console.log(req.body);
   if (error) {
     const msg = error.details.map((el) => el.message).join(",");
     throw new ExpressError(msg, 400);
