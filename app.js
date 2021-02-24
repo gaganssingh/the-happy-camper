@@ -11,6 +11,9 @@ const catchAsync = require("./utils/catchAsync");
 const ExpressError = require("./utils/ExpressError");
 const { campgroundSchema, reviewSchema } = require("./validationSchemas");
 
+// IMPORT ROUTES
+const campgrounds = require("./routes/campgrounds");
+
 // IMPORTED MODELS
 const Campground = require("./models/campground");
 const Review = require("./models/review");
@@ -22,20 +25,6 @@ const app = express();
 app.engine("ejs", ejsMate);
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
-
-// HELPER FUNCTIONS -> TO BE MOVED TO SEPARATE FILE
-// DATA VALIDATION - Campgrounds
-const validateCampground = (req, res, next) => {
-  // Check if all expected data present
-  // If data missing from req body
-  const { error } = campgroundSchema.validate(req.body);
-  if (error) {
-    const msg = error.details.map((el) => el.message).join(",");
-    throw new ExpressError(msg, 400);
-  } else {
-    next();
-  }
-};
 
 // DATA VALIDATION - Reviews
 const validateReview = (req, res, next) => {
@@ -63,80 +52,13 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
 // ROUTE HANDLERS
+
+app.use("/campgrounds", campgrounds); // CAMPGROUNDS ROUTES
+
 // Generic
 app.get("/", (req, res) => {
   res.render("home");
 });
-
-// CAMPGROUNDS ROUTES
-// Campgrounds index
-app.get(
-  "/campgrounds",
-  catchAsync(async (req, res) => {
-    const campgrounds = await Campground.find({});
-    res.render("campgrounds/index", { campgrounds });
-  })
-);
-
-// Add a new campground -> SERVE THE FORM
-app.get("/campgrounds/new", (req, res) => {
-  res.render("campgrounds/new");
-});
-
-// Add a new campground -> POST request from the form
-app.post(
-  "/campgrounds",
-  validateCampground,
-  catchAsync(async (req, res, next) => {
-    // If all expected data present, create the campground
-    const campground = new Campground(req.body.campground);
-    await campground.save();
-    res.redirect(`/campgrounds/${campground._id}`);
-  })
-);
-
-// Find campground by id
-app.get(
-  "/campgrounds/:id",
-  catchAsync(async (req, res) => {
-    const { id } = req.params;
-    const campground = await Campground.findById(id).populate("reviews");
-    res.render("campgrounds/show", { campground });
-  })
-);
-
-// EDIT a campground -> SERVE THE FORM
-app.get(
-  "/campgrounds/:id/edit",
-  catchAsync(async (req, res) => {
-    const { id } = req.params;
-    const campground = await Campground.findById(id);
-    res.render("campgrounds/edit", { campground });
-  })
-);
-
-// EDIT a campground -> PUT request from the form
-app.put(
-  "/campgrounds/:id",
-  validateCampground,
-  catchAsync(async (req, res) => {
-    const { id } = req.params;
-    await Campground.findByIdAndUpdate(id, {
-      ...req.body.campground,
-    });
-    res.redirect(`/campgrounds/${id}`);
-  })
-);
-
-// DELETE route
-app.delete(
-  "/campgrounds/:id",
-  catchAsync(async (req, res) => {
-    const { id } = req.params;
-    await Campground.findByIdAndDelete(id);
-    res.redirect("/campgrounds");
-  })
-);
 
 // REVIEW ROUTES
 // POST - a review
