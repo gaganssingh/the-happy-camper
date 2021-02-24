@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const session = require("express-session");
+const flash = require("connect-flash");
 
 // CUSTOM IMPORTS
 const ExpressError = require("./utils/ExpressError");
@@ -54,9 +55,16 @@ app.set("views", path.join(__dirname, "views")); //Setup the root directory serv
 app.use(express.urlencoded({ extended: true })); // Parse info on req.body
 app.use(methodOverride("_method")); // Override method keyword
 app.use(express.static(path.join(__dirname, "public"))); // Root directory for serving static assets
-app.use(session(sessionConfig));
+app.use(session(sessionConfig)); // Cookie session storage
+app.use(flash()); //
 
-// app.use(session(sessionConfig));
+// FLASH MIDDLEWARE SETUP, so that if req.flash("success") / "error"
+// is available, it's available globally on res.locals.success / .error
+app.use((req, res, next) => {
+  res.locals.success = req.flash("success");
+  res.locals.error = req.flash("error");
+  next();
+});
 
 // ROUTE HANDLERS
 app.use("/campgrounds", campgrounds); // CAMPGROUNDS ROUTES

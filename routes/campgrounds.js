@@ -45,6 +45,7 @@ router.post(
     // If all expected data present, create the campground
     const campground = new Campground(req.body.campground);
     await campground.save();
+    req.flash("success", "Successfully created a new campground!");
     res.redirect(`/campgrounds/${campground._id}`);
   })
 );
