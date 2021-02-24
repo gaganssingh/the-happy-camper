@@ -13,27 +13,28 @@ const ExpressError = require("./utils/ExpressError");
 const campgrounds = require("./routes/campgrounds");
 const reviews = require("./routes/reviews");
 
-// INIT THE APP
-const app = express();
-
-// MIDDLEWARES
-app.engine("ejs", ejsMate);
-app.use(express.urlencoded({ extended: true }));
-app.use(methodOverride("_method"));
-
-// MAKE MONGODB TO APP CONNECTION
+// SERVER CONNECTION - MAKE MONGODB TO APP CONNECTION
 mongoose
   .connect("mongodb://localhost:27017/happy-camper", {
     useNewUrlParser: true,
     useCreateIndex: true,
     useUnifiedTopology: true,
+    useFindAndModify: false,
   })
   .then(() => console.log("✅ Connected to DB"))
   .catch((err) => console.log("❌ An Error Occured"));
 
+// INIT THE APP
+const app = express();
+
+// MIDDLEWARES
 // SETUP EJS ENGINE AND SERVING DIRECTORY
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
+app.engine("ejs", ejsMate); // EJS View Engine
+app.set("view engine", "ejs"); // EJS View Engine
+app.set("views", path.join(__dirname, "views")); //Setup the root directory serving the views
+app.use(express.urlencoded({ extended: true })); // Parse info on req.body
+app.use(methodOverride("_method")); // Override method keyword
+app.use(express.static(path.join(__dirname, "public"))); // Root directory for serving static assets
 
 // ROUTE HANDLERS
 app.use("/campgrounds", campgrounds); // CAMPGROUNDS ROUTES
