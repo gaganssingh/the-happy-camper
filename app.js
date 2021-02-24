@@ -5,6 +5,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
+const session = require("express-session");
 
 // CUSTOM IMPORTS
 const ExpressError = require("./utils/ExpressError");
@@ -27,6 +28,24 @@ mongoose
 // INIT THE APP
 const app = express();
 
+// HELPER FUNCTIONS
+const sessionConfig = {
+  secret: process.env.EXPRESS_SESSION_SECRET,
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    httpOnly: true,
+    expires: Date.now() + 1000 * 60 * 60 * 24 * 7, // expires in a week
+    maxAge: 1000 * 60 * 60 * 24 * 7,
+  },
+  //
+  //
+  // session stored in browser
+  // move to mongo later
+  //
+  //
+};
+
 // MIDDLEWARES
 // SETUP EJS ENGINE AND SERVING DIRECTORY
 app.engine("ejs", ejsMate); // EJS View Engine
@@ -35,6 +54,9 @@ app.set("views", path.join(__dirname, "views")); //Setup the root directory serv
 app.use(express.urlencoded({ extended: true })); // Parse info on req.body
 app.use(methodOverride("_method")); // Override method keyword
 app.use(express.static(path.join(__dirname, "public"))); // Root directory for serving static assets
+app.use(session(sessionConfig));
+
+// app.use(session(sessionConfig));
 
 // ROUTE HANDLERS
 app.use("/campgrounds", campgrounds); // CAMPGROUNDS ROUTES
