@@ -13,22 +13,28 @@ router.get("/register", (req, res) => {
 });
 
 // POST - Register a new user route
-// prettier-ignore
-router.post("/register", catchAsync(async (req, res) => {
-  try {
-    const { email, username, password } = req.body;
-    const user = new User({ email, username });
-  
-    // Use passport plugin to create a new user while also hashing the password
-    const registeredUser = await User.register(user, password);
-    console.log(registeredUser);
-    req.flash("success", "Welcome to YelpCamp");
-    res.redirect("/campgrounds");
-  } catch (e) {
-    req.flash("error", e.message)
-    res.redirect("/register")
-  }
-}));
+router.post(
+  "/register",
+  catchAsync(async (req, res) => {
+    try {
+      const { email, username, password } = req.body;
+      const user = new User({ email, username });
+
+      // Use passport plugin to create a new user while also hashing the password
+      const registeredUser = await User.register(user, password);
+
+      // Automatically log in the new user and redirect
+      req.login(registeredUser, (err) => {
+        if (err) return next(err);
+        req.flash("success", "Welcome to YelpCamp");
+        res.redirect("/campgrounds");
+      });
+    } catch (e) {
+      req.flash("error", e.message);
+      res.redirect("/register");
+    }
+  })
+);
 
 // GET - SERVE the Login a user form
 router.get("/login", (req, res) => {
