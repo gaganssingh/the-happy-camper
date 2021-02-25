@@ -17,8 +17,9 @@ const User = require("./models/user");
 const ExpressError = require("./utils/ExpressError");
 
 // IMPORT ROUTES
-const campgrounds = require("./routes/campgrounds");
-const reviews = require("./routes/reviews");
+const campgroundRoutes = require("./routes/campgrounds");
+const reviewRoutes = require("./routes/reviews");
+const userRoutes = require("./routes/users");
 
 // SERVER CONNECTION - MAKE MONGODB TO APP CONNECTION
 mongoose
@@ -69,7 +70,7 @@ app.use(passport.session()); // Initialize session based login persistance for p
 // Use the authentication strategy located on the User model
 passport.use(new LocalStrategy(User.authenticate()));
 
-// Tell passport hot to serialize / de-serialize user
+// Tell passport how to serialize / de-serialize user
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
@@ -81,16 +82,10 @@ app.use((req, res, next) => {
   next();
 });
 
-// TEST ROUTE FOR AUTHENTICATION
-app.get("/fakeUser", async (req, res) => {
-  const user = new User({ email: "test@gmail.com", username: "test" });
-  const newUser = await User.register(user, "password");
-  res.send(newUser);
-});
-
 // ROUTE HANDLERS
-app.use("/campgrounds", campgrounds); // CAMPGROUNDS ROUTES
-app.use("/campgrounds/:id/reviews", reviews); // REVIEW ROUTES
+app.use("/", userRoutes); // USER ROUTES
+app.use("/campgrounds", campgroundRoutes); // CAMPGROUNDS ROUTES
+app.use("/campgrounds/:id/reviews", reviewRoutes); // REVIEW ROUTES
 
 // Generic
 app.get("/", (req, res) => {
