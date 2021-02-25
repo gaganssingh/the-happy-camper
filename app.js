@@ -7,6 +7,11 @@ const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const session = require("express-session");
 const flash = require("connect-flash");
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
+
+// MODEL IMPORTS
+const User = require("./models/user");
 
 // CUSTOM IMPORTS
 const ExpressError = require("./utils/ExpressError");
@@ -56,7 +61,17 @@ app.use(express.urlencoded({ extended: true })); // Parse info on req.body
 app.use(methodOverride("_method")); // Override method keyword
 app.use(express.static(path.join(__dirname, "public"))); // Root directory for serving static assets
 app.use(session(sessionConfig)); // Cookie session storage
-app.use(flash()); //
+app.use(flash()); // Init flashing of messages upon task completion
+app.use(passport.initialize()); // Initialize Passport
+app.use(passport.session()); // Initialize session based login persistance for passport
+
+// INITIALIZE PASSPORT BY USING METHODS PROVIDED BY PASSPORT
+// Use the authentication strategy located on the User model
+passport.use(new LocalStrategy(User.authenticate()));
+
+// Tell passport hot to serialize / de-serialize user
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 // FLASH MIDDLEWARE SETUP, so that if req.flash("success") / "error"
 // is available, it's available globally on res.locals.success / .error
@@ -64,6 +79,13 @@ app.use((req, res, next) => {
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
   next();
+});
+
+// TEST ROUTE FOR AUTHENTICATION
+app.get("/fakeUser", async (req, res) => {
+  const user = new User({ email: "test@gmail.com", username: "test" });
+  const newUser = await User.register(user, "password");
+  res.send(newUser);
 });
 
 // ROUTE HANDLERS
