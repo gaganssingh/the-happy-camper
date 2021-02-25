@@ -74,9 +74,13 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-// FLASH MIDDLEWARE SETUP, so that if req.flash("success") / "error"
-// is available, it's available globally on res.locals.success / .error
+// GLOBALS MIDDLWEARE SETUP
 app.use((req, res, next) => {
+  // From passport, get .user and make it available globally
+  res.locals.currentUser = req.user;
+
+  // FLASH MIDDLEWARE, so that if req.flash("success") / "error"
+  // is available, it's available globally on res.locals.success / .error
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
   next();
