@@ -49,11 +49,11 @@ router.post(
   })
 );
 
-// TEST ROUTE FOR AUTHENTICATION
-// app.get("/fakeUser", async (req, res) => {
-//   const user = new User({ email: "test@gmail.com", username: "test" });
-//   const newUser = await User.register(user, "password");
-//   res.send(newUser);
-// });
+router.get("/logout", (req, res) => {
+  // Logout using passport provided method .logout()
+  req.logout();
+  req.flash("success", "You have successfully logged out!");
+  res.redirect("/campgrounds");
+});
 
 module.exports = router;

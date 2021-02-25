@@ -8,6 +8,7 @@ const Campground = require("../models/campground");
 const ExpressError = require("../utils/ExpressError");
 const catchAsync = require("../utils/catchAsync");
 const { campgroundSchema } = require("../validationSchemas");
+const { isLoggedIn } = require("../middleware");
 
 // HELPER FUNCTIONS -> TO BE MOVED TO SEPARATE FILE
 // DATA VALIDATION - Campgrounds
@@ -32,14 +33,15 @@ router.get(
   })
 );
 
-// Add a new campground -> SERVE THE FORM
-router.get("/new", (req, res) => {
+// GET -> Serve the new campground form
+router.get("/new", isLoggedIn, (req, res) => {
   res.render("campgrounds/new");
 });
 
-// Add a new campground -> POST request from the form
+// POST -> Create a new campground
 router.post(
   "/",
+  isLoggedIn,
   validateCampground,
   catchAsync(async (req, res, next) => {
     // If all expected data present, create the campground
@@ -50,7 +52,7 @@ router.post(
   })
 );
 
-// Find campground by id
+// GET -> Find campground by id
 router.get(
   "/:id",
   catchAsync(async (req, res) => {
@@ -64,9 +66,10 @@ router.get(
   })
 );
 
-// EDIT a campground -> SERVE THE FORM
+// GET -> Serve the EDIT campground form
 router.get(
   "/:id/edit",
+  isLoggedIn,
   catchAsync(async (req, res) => {
     const { id } = req.params;
     const campground = await Campground.findById(id);
@@ -78,9 +81,10 @@ router.get(
   })
 );
 
-// EDIT a campground -> PUT request from the form
+// PUT -> EDIT a campground logic
 router.put(
   "/:id",
+  isLoggedIn,
   validateCampground,
   catchAsync(async (req, res) => {
     const { id } = req.params;
@@ -95,6 +99,7 @@ router.put(
 // DELETE route
 router.delete(
   "/:id",
+  isLoggedIn,
   catchAsync(async (req, res) => {
     const { id } = req.params;
     await Campground.findByIdAndDelete(id);
