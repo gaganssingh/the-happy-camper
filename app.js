@@ -76,6 +76,7 @@ passport.deserializeUser(User.deserializeUser());
 
 // GLOBALS MIDDLWEARE SETUP
 app.use((req, res, next) => {
+  console.log(req.session);
   // From passport, get .user and make it available globally
   res.locals.currentUser = req.user;
 

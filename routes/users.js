@@ -51,7 +51,11 @@ router.post(
   }),
   catchAsync(async (req, res) => {
     req.flash("success", "Welcome back!");
-    res.redirect("/campgrounds");
+
+    // Capture the page to redirect to
+    const redirectUrl = req.session.returnTo || "/campgrounds";
+    delete req.session.returnTo;
+    res.redirect(redirectUrl);
   })
 );
 
