@@ -9,6 +9,11 @@ const CampgroundSchema = new Schema({
   price: Number,
   description: String,
   location: String,
+  author: {
+    // Reference to the user schema
+    type: Schema.Types.ObjectId,
+    ref: "User",
+  },
   reviews: [
     // Reference to the reviews schema
     // Array of reviews -> One-To-Many relationship
