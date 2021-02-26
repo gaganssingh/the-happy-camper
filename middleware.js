@@ -1,5 +1,6 @@
 const Campground = require("./models/campground");
-const { campgroundSchema } = require("./validationSchemas");
+const Review = require("./models/review");
+const { campgroundSchema, reviewSchema } = require("./validationSchemas");
 const ExpressError = require("./utils/ExpressError");
 
 module.exports.isLoggedIn = (req, res, next) => {
@@ -10,7 +11,7 @@ module.exports.isLoggedIn = (req, res, next) => {
     req.session.returnTo = req.originalUrl;
 
     // Inform user the reason for seeing the login page
-    req.flash("error", "Please login to perform that action");
+    req.flash("error", "You must be logged in to do that.");
 
     // Send user to login page
     return res.redirect("/login");
@@ -40,4 +41,27 @@ module.exports.isAuthor = async (req, res, next) => {
     return res.redirect(`/campgrounds/${id}`);
   }
   next();
+};
+
+module.exports.isReviewAuthor = async (req, res, next) => {
+  const { id, reviewId } = req.params;
+  // Check if logged in user is authorized to Modify the campground
+  // (check if logged in user is same as the user that create the campground)
+  const review = await Review.findById(reviewId);
+  if (!review.author.equals(req.user._id)) {
+    req.flash("error", "You do not have permission to edit that campground.");
+    return res.redirect(`/campgrounds/${id}`);
+  }
+  next();
+};
+
+// DATA VALIDATION - Reviews
+module.exports.validateReview = (req, res, next) => {
+  const { error } = reviewSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
+    throw new ExpressError(msg, 400);
+  } else {
+    next();
+  }
 };

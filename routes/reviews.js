@@ -6,40 +6,41 @@ const Campground = require("../models/campground");
 const Review = require("../models/review");
 
 // CUSTOM IMPORTS
-const ExpressError = require("../utils/ExpressError");
 const catchAsync = require("../utils/catchAsync");
-const { reviewSchema } = require("../validationSchemas");
-
-// DATA VALIDATION - Reviews
-const validateReview = (req, res, next) => {
-  const { error } = reviewSchema.validate(req.body);
-  if (error) {
-    const msg = error.details.map((el) => el.message).join(",");
-    throw new ExpressError(msg, 400);
-  } else {
-    next();
-  }
-};
+const { isLoggedIn, isReviewAuthor, validateReview } = require("../middleware");
 
 // POST - a review
-// prettier-ignore
-router.post("/", validateReview, catchAsync(async (req, res) => {
+router.post(
+  "/",
+  isLoggedIn,
+  validateReview,
+  catchAsync(async (req, res) => {
+    // Pull up the campground this review is associated with
     const { id } = req.params;
     const campground = await Campground.findById(id);
-    // console.log(campground)
 
+    // Create the review
     const review = new Review(req.body.review);
+    // Add the author id info to the review
+    review.author = req.user._id;
+    // Push review onto the campground
     campground.reviews.push(review);
+
+    // Save both the review and the campground
     await review.save();
     await campground.save();
-    req.flash("success", "Successfully added your review!")
+
+    req.flash("success", "Successfully added your review!");
     res.redirect(`/campgrounds/${campground._id}`);
   })
 );
 
 // DELETE - a review
-// prettier-ignore
-router.delete("/:reviewId", catchAsync(async (req, res) => {
+router.delete(
+  "/:reviewId",
+  isLoggedIn,
+  isReviewAuthor,
+  catchAsync(async (req, res) => {
     const { id, reviewId } = req.params;
 
     // from the campground db, delete the entry for this review
@@ -48,7 +49,7 @@ router.delete("/:reviewId", catchAsync(async (req, res) => {
 
     // from the review db, delete this review
     await Review.findByIdAndDelete(reviewId);
-    req.flash("success", "Successfully deleted review!")
+    req.flash("success", "Successfully deleted review!");
     res.redirect(`/campgrounds/${id}`);
   })
 );
