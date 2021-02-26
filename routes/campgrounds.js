@@ -34,8 +34,9 @@ router
   .put(
     isLoggedIn,
     isAuthor,
+    upload.array("image"),
     validateCampground,
-    catchAsync(campgroundsController.editCampground)
+    catchAsync(campgroundsController.updateCampground)
   )
   .delete(
     isLoggedIn,

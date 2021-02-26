@@ -57,6 +57,7 @@ module.exports.findAndShowCampground = async (req, res) => {
 };
 
 module.exports.renderEditCampgroundForm = async (req, res) => {
+  // Find campground that needs to be updated
   const { id } = req.params;
   const campground = await Campground.findById(id);
   if (!campground) {
@@ -64,15 +65,24 @@ module.exports.renderEditCampgroundForm = async (req, res) => {
     return res.redirect("/campgrounds");
   }
 
+  // Render campground edit form
   res.render("campgrounds/edit", { campground });
 };
 
 module.exports.editCampground = async (req, res) => {
+  // Find campground that needs to be updated
   const { id } = req.params;
-
-  await Campground.findByIdAndUpdate(id, {
+  const campground = await Campground.findByIdAndUpdate(id, {
     ...req.body.campground,
   });
+
+  // Push new images to the existing images array in campgrounds model
+  const imgs = req.files.map((f) => ({ url: f.path, filename: f.filename }));
+  campground.images.push(...imgs);
+
+  // Save the updated campground to DB
+  await campground.save();
+
   req.flash("success", "Successfully updated campground details!");
   res.redirect(`/campgrounds/${id}`);
 };
