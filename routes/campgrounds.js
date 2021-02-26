@@ -1,113 +1,36 @@
 const express = require("express");
 const router = express.Router();
 
-// IMPORTED MODELS
-const Campground = require("../models/campground");
+// IMPORTED CONTROLLERS
+const campgrounds = require("../controllers/campgrounds");
 
 // CUSTOM IMPORTS
 const catchAsync = require("../utils/catchAsync");
 const { isLoggedIn, isAuthor, validateCampground } = require("../middleware");
 
-// HELPER FUNCTIONS -> TO BE MOVED TO SEPARATE FILE
-// DATA VALIDATION - Campgrounds
-
-// Campgrounds index
-router.get(
-  "/",
-  catchAsync(async (req, res) => {
-    const campgrounds = await Campground.find({});
-    res.render("campgrounds/index", { campgrounds });
-  })
-);
+// GET -> All Campgrounds
+router.get("/", catchAsync(campgrounds.index));
 
 // GET -> Serve the new campground form
-router.get("/new", isLoggedIn, (req, res) => {
-  res.render("campgrounds/new");
-});
+router.get("/new", isLoggedIn, campgrounds.renderNewCampgroundForm);
 
 // POST -> Create a new campground
-router.post(
-  "/",
-  isLoggedIn,
-  validateCampground,
-  catchAsync(async (req, res, next) => {
-    // If all expected data present, create the campground
-    const campground = new Campground(req.body.campground);
-    campground.author = req.user._id;
-    await campground.save();
-
-    req.flash("success", "Successfully created a new campground!");
-    res.redirect(`/campgrounds/${campground._id}`);
-  })
-);
+// prettier-ignore
+router.post("/", isLoggedIn, validateCampground, catchAsync(campgrounds.createCampground));
 
 // GET -> Find campground by id
-router.get(
-  "/:id",
-  catchAsync(async (req, res) => {
-    const { id } = req.params;
-    // prettier-ignore
-    const campground = await Campground.findById(id).populate({
-      path: "reviews",
-      populate: {
-        path: "author"
-      }
-    }).populate("author");
-
-    if (!campground) {
-      req.flash("error", "Campground not found!");
-      return res.redirect("/campgrounds");
-    }
-    res.render("campgrounds/show", { campground });
-  })
-);
+router.get("/:id", catchAsync(campgrounds.findAndShowCampground));
 
 // GET -> Serve the EDIT campground form
-router.get(
-  "/:id/edit",
-  isLoggedIn,
-  isAuthor,
-  catchAsync(async (req, res) => {
-    const { id } = req.params;
-    const campground = await Campground.findById(id);
-    if (!campground) {
-      req.flash("error", "Campground not found!");
-      return res.redirect("/campgrounds");
-    }
-
-    res.render("campgrounds/edit", { campground });
-  })
-);
+// prettier-ignore
+router.get("/:id/edit", isLoggedIn, isAuthor, catchAsync(campgrounds.renderEditCampgroundForm));
 
 // PUT -> EDIT a campground logic
-router.put(
-  "/:id",
-  isLoggedIn,
-  isAuthor,
-  validateCampground,
-  catchAsync(async (req, res) => {
-    const { id } = req.params;
-
-    await Campground.findByIdAndUpdate(id, {
-      ...req.body.campground,
-    });
-    req.flash("success", "Successfully updated campground details!");
-    res.redirect(`/campgrounds/${id}`);
-  })
-);
+// prettier-ignore
+router.put("/:id", isLoggedIn, isAuthor, validateCampground, catchAsync(campgrounds.editCampground));
 
 // DELETE route
-router.delete(
-  "/:id",
-  isLoggedIn,
-  isAuthor,
-  catchAsync(async (req, res) => {
-    const { id } = req.params;
-
-    await Campground.findByIdAndDelete(id);
-    req.flash("success", "Successfully deleted that campground!");
-    res.redirect("/campgrounds");
-  })
-);
+// prettier-ignore
+router.delete("/:id", isLoggedIn, isAuthor, catchAsync(campgrounds.deleteCampground));
 
 module.exports = router;
