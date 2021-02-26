@@ -1,5 +1,5 @@
 // MODULE IMPORTS
-require("dotenv").config();
+process.env.NODE_ENV !== "production" ? require("dotenv").config() : null;
 const path = require("path");
 const express = require("express");
 const mongoose = require("mongoose");

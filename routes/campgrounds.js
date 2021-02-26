@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const multer = require("multer");
+const { storage } = require("../cloudinary");
 
 // IMPORT CONTROLLERS
 const campgroundsController = require("../controllers/campgroundsController");
@@ -8,12 +10,16 @@ const campgroundsController = require("../controllers/campgroundsController");
 const catchAsync = require("../utils/catchAsync");
 const { isLoggedIn, isAuthor, validateCampground } = require("../middleware");
 
+// CONFIGURE MULTER TO UPLOAD IMAGES TO CLOUDINARY
+const upload = multer(storage);
+
 // ROUTES
 router
   .route("/")
   .get(catchAsync(campgroundsController.index))
   .post(
     isLoggedIn,
+    upload.array("image"),
     validateCampground,
     catchAsync(campgroundsController.createCampground)
   );
