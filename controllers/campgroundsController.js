@@ -1,4 +1,5 @@
 const Campground = require("../models/campground");
+const { cloudinary } = require("../cloudinary");
 
 module.exports.index = async (req, res) => {
   const campgrounds = await Campground.find({});
@@ -79,6 +80,19 @@ module.exports.editCampground = async (req, res) => {
   // Push new images to the existing images array in campgrounds model
   const imgs = req.files.map((f) => ({ url: f.path, filename: f.filename }));
   campground.images.push(...imgs);
+
+  // Delete selected images, is any, from cloudinary and remove schema associations
+  if (req.body.deleteImages) {
+    // remove from cloudinary
+    for (let filename of req.body.deleteImages) {
+      await cloudinary.uploader.destroy(filename);
+    }
+
+    // remove entry of these images from the db
+    await campground.updateOne({
+      $pull: { images: { filename: { $in: req.body.deleteImages } } },
+    });
+  }
 
   // Save the updated campground to DB
   await campground.save();
