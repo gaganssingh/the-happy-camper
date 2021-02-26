@@ -6,29 +6,25 @@ const router = express.Router();
 const usersController = require("../controllers/usersController");
 
 const catchAsync = require("../utils/catchAsync");
-const { route } = require("./campgrounds");
 
-// GET - SERVE the registeration form
-router.get("/register", usersController.renderRegisterUserForm);
+// ROUTES
+router
+  .route("/register")
+  .get(usersController.renderRegisterUserForm)
+  .post(catchAsync(usersController.registerUser));
 
-// POST - Register a new user route
-router.post("/register", catchAsync(usersController.registerUser));
+router
+  .route("/login")
+  .get(usersController.renderLoginForm)
+  .post(
+    // Use built-in passport method to authenticate users
+    passport.authenticate("local", {
+      failureFlash: true,
+      failureRedirect: "/login",
+    }),
+    catchAsync(usersController.login)
+  );
 
-// GET - SERVE the Login a user form
-router.get("/login", usersController.renderLoginForm);
-
-// POST - Login a user route
-router.post(
-  "/login",
-  // Use built-in passport method to authenticate users
-  passport.authenticate("local", {
-    failureFlash: true,
-    failureRedirect: "/login",
-  }),
-  catchAsync(usersController.login)
-);
-
-// GET -> Logout user
-router.get("/logout", usersController.logout);
+router.route("/logout").get(usersController.logout);
 
 module.exports = router;
