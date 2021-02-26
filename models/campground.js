@@ -10,7 +10,7 @@ const ImageSchema = new Schema({
 
 // GENERATE THUMBNAIL IMAGE FROM THE CLOUDINARY IMAGE URL
 ImageSchema.virtual("thumbnail").get(function () {
-  return this.url.replace("/upload", "/upload/w-200");
+  return this.url.replace("/upload", "/upload/w_200");
 });
 
 const CampgroundSchema = new Schema({

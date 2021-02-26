@@ -45,12 +45,6 @@ const sessionConfig = {
     expires: Date.now() + 1000 * 60 * 60 * 24 * 7, // expires in a week
     maxAge: 1000 * 60 * 60 * 24 * 7,
   },
-  //
-  //
-  // session stored in browser
-  // move to mongo later
-  //
-  //
 };
 
 // MIDDLEWARES

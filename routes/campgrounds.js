@@ -1,17 +1,17 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const { storage } = require("../cloudinary");
 
 // IMPORT CONTROLLERS
 const campgroundsController = require("../controllers/campgroundsController");
 
 // CUSTOM IMPORTS
+const { storage } = require("../cloudinary");
 const catchAsync = require("../utils/catchAsync");
 const { isLoggedIn, isAuthor, validateCampground } = require("../middleware");
 
 // CONFIGURE MULTER TO UPLOAD IMAGES TO CLOUDINARY
-const upload = multer(storage);
+const upload = multer({ storage });
 
 // ROUTES
 router

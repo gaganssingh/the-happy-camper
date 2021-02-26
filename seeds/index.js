@@ -22,7 +22,7 @@ const seedDB = async () => {
   await Campground.deleteMany({});
 
   // Create new locations
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < 10; i++) {
     const random1000 = Math.floor(Math.random() * cities.length);
     const randomPrice = Math.floor(Math.random() * 20) + 10;
     const camp = new Campground({
@@ -32,16 +32,16 @@ const seedDB = async () => {
       description:
         "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Aliquam dignissimos ut minima ad odio eos!",
       price: randomPrice,
-      image: [
+      images: [
         {
           url:
-            "https://res.cloudinary.com/dee1o1ghi/image/upload/v1614367592/TheHappyCamper/lake_kftori.jpg",
-          filename: "TheHappyCamper/lake_kftori",
+            "https://res.cloudinary.com/dee1o1ghi/image/upload/v1614374923/TheHappyCamper/oli6lvyprgrs7jfqkctw.jpg",
+          filename: "TheHappyCamper/oli6lvyprgrs7jfqkctw",
         },
         {
           url:
-            "https://res.cloudinary.com/dee1o1ghi/image/upload/v1614367592/TheHappyCamper/camp_r0nfqe.jpg",
-          filename: "TheHappyCamper/camp_r0nfqe",
+            "https://res.cloudinary.com/dee1o1ghi/image/upload/v1614374923/TheHappyCamper/pg5jenlspvygobtsa4s4.jpg",
+          filename: "TheHappyCamper/pg5jenlspvygobtsa4s4",
         },
       ],
     });
