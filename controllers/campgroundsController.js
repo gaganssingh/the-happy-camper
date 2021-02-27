@@ -1,5 +1,10 @@
+const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
+
 const Campground = require("../models/campground");
 const { cloudinary } = require("../cloudinary");
+
+// CONFIGURE MAPBOX
+const geocoder = mbxGeocoding({ accessToken: process.env.MAPBOX_TOKEN });
 
 // GET -> /campgrounds -> Campgrounds index page (campgrounds/index.ejs)
 module.exports.index = async (req, res) => {
@@ -13,8 +18,20 @@ module.exports.renderNewCampgroundForm = (req, res) =>
 
 // POST -> /campgrounds -> Create new campground
 module.exports.createCampground = async (req, res, next) => {
+  // Get location coords using mapbox
+  const geoData = await geocoder
+    .forwardGeocode({
+      query: req.body.campground.location,
+      limit: 1,
+    })
+    .send();
+
   // If all expected data present, create the campground
   const campground = new Campground(req.body.campground);
+
+  // Insert location coordinates into the campground's geometry field
+  // campground.geometry = { type: 'Point', coordinates: [ -79.3849, 43.6529 ] }
+  campground.geometry = geoData.body.features[0].geometry;
 
   // Parse uploaded image to associated field name in campground schema
   // .files on request added by multer
