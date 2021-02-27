@@ -25,8 +25,8 @@ const reviewRoutes = require("./routes/reviews");
 const userRoutes = require("./routes/users");
 
 // SERVER CONNECTION - MAKE MONGODB TO APP CONNECTION
-const dbUrl = "mongodb://localhost:27017/happy-camper";
-// const dbUrl = process.env.DB_URL
+const dbUrl = process.env.DB_URL || "mongodb://localhost:27017/happy-camper";
+
 mongoose
   .connect(dbUrl, {
     // .connect(process.env.DB_URL, {
@@ -44,7 +44,7 @@ const app = express();
 // CONFIGURE SESSION STORAGE ON MONGODB
 const store = MongoStore.create({
   mongoUrl: dbUrl,
-  secret: process.env.EXPRESS_SESSION_SECRET,
+  secret: process.env.SECRET,
   touchAfter: 24 * 60 * 60,
 });
 store.on("error", (err) => console.log("Session store error", e));
@@ -52,7 +52,7 @@ store.on("error", (err) => console.log("Session store error", e));
 const sessionConfig = {
   store, // User session storage on MongoDB
   name: "session",
-  secret: process.env.EXPRESS_SESSION_SECRET,
+  secret: process.env.SECRET,
   resave: false,
   saveUninitialized: true,
   cookie: {
