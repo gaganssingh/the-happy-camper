@@ -38,5 +38,5 @@ module.exports.logout = (req, res) => {
   // Logout using passport provided method .logout()
   req.logout();
   req.flash("success", "You have successfully logged out!");
-  res.redirect("/campgrounds");
+  res.redirect("/");
 };
