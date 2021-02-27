@@ -9,6 +9,7 @@ const session = require("express-session");
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
+const mongoSanitize = require("express-mongo-sanitize");
 
 // MODEL IMPORTS
 const User = require("./models/user");
@@ -59,6 +60,7 @@ app.use(session(sessionConfig)); // Cookie session storage
 app.use(flash()); // Init flashing of messages upon task completion
 app.use(passport.initialize()); // Initialize Passport
 app.use(passport.session()); // Initialize session based login persistance for passport
+app.use(mongoSanitize());
 
 // INITIALIZE PASSPORT BY USING METHODS PROVIDED BY PASSPORT
 // Use the authentication strategy located on the User model
