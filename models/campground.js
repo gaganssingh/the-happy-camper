@@ -9,43 +9,58 @@ const ImageSchema = new Schema({
 });
 
 // GENERATE THUMBNAIL IMAGE FROM THE CLOUDINARY IMAGE URL
+// This thumbnail is displayed on the edit campground's delete image section
 ImageSchema.virtual("thumbnail").get(function () {
   return this.url.replace("/upload", "/upload/w_200");
 });
 
-const CampgroundSchema = new Schema({
-  title: String,
-  images: [ImageSchema],
-  geometry: {
-    // Storing GeoJSON data
-    // Follows the GeoJSON specification
-    // Format -> { type: 'Point', coordinates: [ -79.3849, 43.6529 ] }
-    type: {
-      type: String,
-      enum: ["Point"],
-      required: true,
+const opts = { toJSON: { virtuals: true } };
+
+const CampgroundSchema = new Schema(
+  {
+    title: String,
+    images: [ImageSchema],
+    geometry: {
+      // Storing GeoJSON data
+      // Follows the GeoJSON specification
+      // Format e.g. -> { type: 'Point', coordinates: [ -79.3849, 43.6529 ] }
+      type: {
+        type: String,
+        enum: ["Point"],
+        required: true,
+      },
+      coordinates: {
+        type: [Number],
+        required: true,
+      },
     },
-    coordinates: {
-      type: [Number],
-      required: true,
-    },
-  },
-  price: Number,
-  description: String,
-  location: String,
-  author: {
-    // Reference to the user schema
-    type: Schema.Types.ObjectId,
-    ref: "User",
-  },
-  reviews: [
-    // Reference to the reviews schema
-    // Array of reviews -> One-To-Many relationship
-    {
+    price: Number,
+    description: String,
+    location: String,
+    author: {
+      // Reference to the user schema
       type: Schema.Types.ObjectId,
-      ref: "Review",
+      ref: "User",
     },
-  ],
+    reviews: [
+      // Reference to the reviews schema
+      // Array of reviews -> One-To-Many relationship
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Review",
+      },
+    ],
+  },
+  opts
+);
+
+// VIRTUALS
+CampgroundSchema.virtual("properties.HTMLpopup").get(function () {
+  return `<strong>
+  <a href="/campgrounds/${this._id}">${this.title}</a>
+  </strong>
+  <p>${this.description.substring(0, 15)}...</p>
+  `;
 });
 
 // MIDDLEWARES
