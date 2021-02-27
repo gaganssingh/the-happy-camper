@@ -38,11 +38,13 @@ const app = express();
 
 // HELPER FUNCTIONS
 const sessionConfig = {
+  name: "session",
   secret: process.env.EXPRESS_SESSION_SECRET,
   resave: false,
   saveUninitialized: true,
   cookie: {
     httpOnly: true,
+    // secure: true, // Turn on to ONLY allow https connections
     expires: Date.now() + 1000 * 60 * 60 * 24 * 7, // expires in a week
     maxAge: 1000 * 60 * 60 * 24 * 7,
   },
