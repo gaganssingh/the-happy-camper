@@ -5,12 +5,13 @@ const express = require("express");
 const mongoose = require("mongoose");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
-const session = require("express-session");
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const mongoSanitize = require("express-mongo-sanitize");
 const helmet = require("helmet");
+const session = require("express-session");
+const MongoStore = require("connect-mongo").default;
 
 // MODEL IMPORTS
 const User = require("./models/user");
@@ -24,8 +25,11 @@ const reviewRoutes = require("./routes/reviews");
 const userRoutes = require("./routes/users");
 
 // SERVER CONNECTION - MAKE MONGODB TO APP CONNECTION
+const dbUrl = "mongodb://localhost:27017/happy-camper";
+// const dbUrl = process.env.DB_URL
 mongoose
-  .connect("mongodb://localhost:27017/happy-camper", {
+  .connect(dbUrl, {
+    // .connect(process.env.DB_URL, {
     useNewUrlParser: true,
     useCreateIndex: true,
     useUnifiedTopology: true,
@@ -37,8 +41,16 @@ mongoose
 // INIT THE APP
 const app = express();
 
-// HELPER FUNCTIONS
+// CONFIGURE SESSION STORAGE ON MONGODB
+const store = MongoStore.create({
+  mongoUrl: dbUrl,
+  secret: process.env.EXPRESS_SESSION_SECRET,
+  touchAfter: 24 * 60 * 60,
+});
+store.on("error", (err) => console.log("Session store error", e));
+
 const sessionConfig = {
+  store, // User session storage on MongoDB
   name: "session",
   secret: process.env.EXPRESS_SESSION_SECRET,
   resave: false,
