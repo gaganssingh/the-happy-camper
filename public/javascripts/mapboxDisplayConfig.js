@@ -7,6 +7,8 @@ const map = new mapboxgl.Map({
   zoom: 7, // starting zoom
 });
 
+map.addControl(new mapboxgl.NavigationControl(), "bottom-right");
+
 // Adding PIN to the map
 const markerOptions = { color: "red" };
 const popupOptions = new mapboxgl.Popup({

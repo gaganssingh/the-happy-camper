@@ -4,9 +4,6 @@
 <!-- PAGE BODY -->
 <div class="row">
   <div class="col-6">
-    <!-- Display map of location -->
-    <div id="map" style="width: 400px; height: 300px"></div>
-
     <!-- Image Carousel -->
     <div id="campgroundCarousel" class="carousel slide" data-bs-ride="carousel">
       <!-- Carousel Main Image -->
@@ -80,6 +77,10 @@
 
   <!-- Form for adding a review -->
   <div class="col-6">
+    <!-- Display map of location -->
+    <div id="map"></div>
+
+    <!-- Review section -->
     <% if (currentUser) { %>
     <h2>Leave a Review</h2>
     <form
